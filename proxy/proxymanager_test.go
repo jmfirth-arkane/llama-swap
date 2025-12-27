@@ -1015,6 +1015,40 @@ func TestProxyManager_CompletionEndpoint(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "model1")
 }
 
+// Ensure the OpenAI Responses API /v1/responses endpoint proxies correctly
+func TestProxyManager_ResponsesAPIEndpoint(t *testing.T) {
+	config := config.AddDefaultGroupToConfig(config.Config{
+		HealthCheckTimeout: 15,
+		Models: map[string]config.ModelConfig{
+			"model1": getTestSimpleResponderConfig("model1"),
+		},
+		LogLevel: "error",
+	})
+
+	proxy := New(config)
+	defer proxy.StopProcesses(StopWaitForInflightRequest)
+
+	t.Run("basic request", func(t *testing.T) {
+		reqBody := `{"model":"model1","input":"Hello"}`
+		req := httptest.NewRequest("POST", "/v1/responses", bytes.NewBufferString(reqBody))
+		w := CreateTestResponseRecorder()
+
+		proxy.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), "model1")
+	})
+
+	t.Run("missing model returns 400", func(t *testing.T) {
+		reqBody := `{"input":"Hello"}`
+		req := httptest.NewRequest("POST", "/v1/responses", bytes.NewBufferString(reqBody))
+		w := CreateTestResponseRecorder()
+
+		proxy.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "model")
+	})
+}
+
 func TestProxyManager_StartupHooks(t *testing.T) {
 
 	// using real YAML as the configuration has gotten more complex

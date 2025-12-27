@@ -166,6 +166,21 @@ func main() {
 		})
 	})
 
+	// OpenAI Responses API: /v1/responses
+	r.POST("/v1/responses", func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+		c.JSON(http.StatusOK, gin.H{
+			"id":              "resp_test123",
+			"object":          "response",
+			"responseMessage": *responseMessage,
+			"usage": gin.H{
+				"input_tokens":  25,
+				"output_tokens": 10,
+				"total_tokens":  35,
+			},
+		})
+	})
+
 	// issue #41
 	r.POST("/v1/audio/transcriptions", func(c *gin.Context) {
 		// Parse the multipart form

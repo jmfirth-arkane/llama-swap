@@ -19,6 +19,7 @@ Built in Go for performance and simplicity, llama-swap has zero dependencies and
   - `v1/completions`
   - `v1/chat/completions`
   - `v1/embeddings`
+  - `v1/responses` - OpenAI Responses API
   - `v1/audio/speech` ([#36](https://github.com/mostlygeek/llama-swap/issues/36))
   - `v1/audio/transcriptions` ([docs](https://github.com/mostlygeek/llama-swap/issues/41#issuecomment-2722637867))
 - ✅ Anthropic API supported endpoints:

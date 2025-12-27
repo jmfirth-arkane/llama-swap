@@ -263,6 +263,9 @@ func (pm *ProxyManager) setupGinEngine() {
 	// Support anthropic /v1/messages (added https://github.com/ggml-org/llama.cpp/pull/17570)
 	pm.ginEngine.POST("/v1/messages", pm.apiKeyAuth(), pm.proxyInferenceHandler)
 
+	// Support OpenAI Responses API
+	pm.ginEngine.POST("/v1/responses", pm.apiKeyAuth(), pm.proxyInferenceHandler)
+
 	// Support embeddings and reranking
 	pm.ginEngine.POST("/v1/embeddings", pm.apiKeyAuth(), pm.proxyInferenceHandler)
 

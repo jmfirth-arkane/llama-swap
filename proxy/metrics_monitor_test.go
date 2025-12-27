@@ -488,6 +488,43 @@ func TestMetricsMonitor_Concurrent(t *testing.T) {
 	})
 }
 
+func TestMetricsMonitor_ResponsesAPIFormat(t *testing.T) {
+	t.Run("parses OpenAI Responses API usage format", func(t *testing.T) {
+		mm := newMetricsMonitor(testLogger, 10)
+
+		// Responses API uses input_tokens/output_tokens (same as Anthropic)
+		responseBody := `{
+			"id": "resp_123",
+			"object": "response",
+			"usage": {
+				"input_tokens": 100,
+				"output_tokens": 50,
+				"total_tokens": 150
+			}
+		}`
+
+		nextHandler := func(modelID string, w http.ResponseWriter, r *http.Request) error {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(responseBody))
+			return nil
+		}
+
+		req := httptest.NewRequest("POST", "/v1/responses", nil)
+		rec := httptest.NewRecorder()
+		ginCtx, _ := gin.CreateTestContext(rec)
+
+		err := mm.wrapHandler("test-model", ginCtx.Writer, req, nextHandler)
+		assert.NoError(t, err)
+
+		metrics := mm.getMetrics()
+		assert.Equal(t, 1, len(metrics))
+		assert.Equal(t, "test-model", metrics[0].Model)
+		assert.Equal(t, 100, metrics[0].InputTokens)
+		assert.Equal(t, 50, metrics[0].OutputTokens)
+	})
+}
+
 func TestMetricsMonitor_ParseMetrics(t *testing.T) {
 	t.Run("prefers timings over usage data", func(t *testing.T) {
 		mm := newMetricsMonitor(testLogger, 10)

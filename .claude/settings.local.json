@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebSearch",
+      "WebFetch(domain:community.openai.com)",
+      "Bash(make test-dev:*)",
+      "Bash(go test:*)",
+      "Bash(make:*)"
+    ]
+  }
+}
